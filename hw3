@@ -1,0 +1,41 @@
+#include <iostream>
+#include <fstream>
+using namespace std;
+int main() {
+	ifstream i("txot");  //建立一個ifstream型態連結到存放14行的16進制檔案
+	ofstream o("txot_binary", ios_base::out | ios_base::binary); //建立一個ofstream型態連結到txot_binary並以二進制儲存
+	int a,j=0,temp;
+	bool flag = 1;   //利用旗標將每兩筆資料存在一起
+	while (i >> hex >> temp)  //讀入txot內14行的16進制資料
+	{
+		if (flag) {           
+			a= temp * 1024;  //奇數資料乘以2的十次方
+			flag = 0;
+		}
+		else {
+			a += temp;
+			++j;
+			flag = 1;
+			o.write(reinterpret_cast<char*> (&a), sizeof(a)); //同時將資料寫入txot_binary並以二進制儲存
+		}
+	}
+	i.close();  //關閉istream
+	o.close();  //關閉ostream
+	
+	ifstream foo("txot_binary", ios_base::in | ios_base::binary);  //建立一個ifstream型態連結到txot_binary並以二進制讀取
+	int I;
+	while (foo.read(reinterpret_cast<char*> (&I), sizeof(I))) { //txot_binary並以二進制讀取
+		for (int b = 19,temp=0; b >0; --b) {  //每一筆資料裡面存放兩個數值
+			if (b == 9)         //此時已讀完第一筆也就是奇數行資料 故換行
+				cout <<endl;
+
+			temp = (I >> b);    //用位元運算子來判斷 二進制的每一位
+				if (temp % 2 == 0) //若被2整除代表此項為0 故輸出空格
+					cout << " ";
+				else              //若不被2整除代表此項為1 故輸出*
+					cout << "*";
+		}
+		cout << endl;
+	}
+	return 0;
+}
